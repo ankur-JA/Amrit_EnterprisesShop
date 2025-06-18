@@ -1,15 +1,63 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SELLER
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  sales        Sale[]
+  createdAt    DateTime @default(now())
+}
+
+model Item {
+  id            Int       @id @default(autoincrement())
+  name          String
+  sku           String    @unique
+  quantity      Int
+  purchasePrice Float
+  sellingPrice  Float
+  saleItems     SaleItem[]
+}
+
+model Sale {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime   @default(now())
+  total     Float
+  saleItems SaleItem[]
+  credit    Credit?
+}
+
+model SaleItem {
+  id       Int  @id @default(autoincrement())
+  sale     Sale @relation(fields: [saleId], references: [id])
+  saleId   Int
+  item     Item @relation(fields: [itemId], references: [id])
+  itemId   Int
+  quantity Int
+  price    Float
+}
+
+model Credit {
+  id       Int      @id @default(autoincrement())
+  sale     Sale     @relation(fields: [saleId], references: [id])
+  saleId   Int      @unique
+  customer String
+  dueDate  DateTime
+  paid     Boolean  @default(false)
 }
