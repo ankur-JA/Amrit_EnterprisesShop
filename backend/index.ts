@@ -1,11 +1,12 @@
-const express = require('express');
-
+import express from 'express';
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-const PORT = e
+app.get('/', (_req, res) => {
+  res.send('API is running');
+});
 
-
-
-
-app.listen()
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
